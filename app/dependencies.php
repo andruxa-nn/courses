@@ -7,6 +7,10 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface;
+use League\Uri\PublicSuffix\Cache;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Client;
 
 return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
@@ -23,6 +27,16 @@ return function (ContainerBuilder $containerBuilder) {
             $logger->pushHandler($handler);
 
             return $logger;
+        },
+        CacheInterface::class => function (ContainerInterface $c) {
+            $settings = $c->get('settings');
+
+            return new Cache($settings['cachePath']);
+        },
+        ClientInterface::class => function (ContainerInterface $c) {
+            $settings = $c->get('settings');
+
+            return new Client($settings['httpClient']);
         },
     ]);
 };
